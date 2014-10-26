@@ -3,6 +3,7 @@ classdef Constants
         room_width = 3;
         robot_diameter = 0.4;
         time_delay = 0.01;
+        time_delay_sim = 0.001
         angle_threshold = 0.05;
         distance_threshold = 0.01;
         obstacle_cell = 125;
@@ -10,7 +11,7 @@ classdef Constants
         target_cell = 50;
         current_cell = 10;
         empty_cell = 255;
-        forward_speed = 0.2;
-        angular_speed =0.5;
+        forward_speed = 0.4;
+        angular_speed =pi/6;
     end
 end

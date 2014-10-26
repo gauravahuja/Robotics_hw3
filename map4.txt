@@ -1,0 +1,26 @@
+% File containing map information
+
+
+% Formatting:
+% wall x1 y1 x2 y2
+%   Order does not matter between the points
+% line x1 y1 x2 y2
+% beacon x y [r g b] ID_tag
+%   [r g b] is the red-green-blue color vector
+% virtwall x y theta
+%   Virtual walls emit from a location, not like real walls
+%   theta is the angle relative to the positive x-axis
+
+
+wall -1.974 3.010 -1.974 -3.030
+wall -1.974 -3.030 3.009 -3.030
+wall 3.009 -3.030 3.009 3.010
+wall 3.009 3.010 -1.974 3.010
+wall 0.595 2.290 0.595 1.790
+wall 0.595 1.790 1.095 1.790
+wall 1.095 1.790 1.095 2.290
+wall 1.095 2.290 0.595 2.290
+wall -0.836 -0.630 -0.836 -1.410
+wall -0.836 -1.410 0.784 -1.410
+wall 0.784 -1.410 0.784 -0.630
+wall 0.784 -0.630 -0.836 -0.630

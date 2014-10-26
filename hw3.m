@@ -22,23 +22,29 @@ function room = hw3(serPort)
   curr_x = col;
   curr_y = row;
   orientation = [1 0];
-  
+  target_x = 0;
+  target_y = 0;
+  find_target = 1;
   % new algorithm
   
   while(size(A)~=0)
-       rand_ind = randi([1 size(A,1)]);
-       target_y = A(rand_ind);
-       target_x = B(rand_ind);
+       if find_target ==1
+           rand_ind = randi([1 size(A,1)]);
+           target_y = A(rand_ind);
+           target_x = B(rand_ind);
+       end
+       
        fprintf('curr = (%d, %d), target = (%d, %d)\n', curr_x, curr_y, target_x, target_y);
        room(target_y, target_x) = Constants.target_cell;
        
-       figure(f), imagesc(room);
+       figure(f), imagesc(room), colorbar;
        
        p = shortestPath(curr_x, curr_y, target_x, target_y, room, size(room,1));
        
        if(size(p,1) == 0)
             fprintf('Target is unreachable\n')
             room(target_y, target_x) = Constants.obstacle_cell;
+            find_target = 1;
        else
            i = 1;
            while(room(target_y,target_x) == Constants.target_cell) 
@@ -54,23 +60,29 @@ function room = hw3(serPort)
                  room(tiy, tix) = Constants.obstacle_cell; 
                  break;
              elseif(hit_right == 1)
-                break;
+                room(tiy, tix) = Constants.obstacle_cell; 
+                 break;
              elseif(hit_left == 1)
-                break;
+                room(tiy, tix) = Constants.obstacle_cell; 
+                 break;
              else
                  room(tiy, tix) = Constants.empty_cell;
                  i = i+1;
              end
-             figure(f) ,imagesc(room);
+             figure(f) ,imagesc(room), colorbar;
              
            end
            if (room(target_y,target_x) == Constants.target_cell)
+                find_target = 0;
                 room(target_y,target_x) = Constants.unexplored_cell;
+           
+           else
+                find_target =1;
            end
        end
      [A,B] = find(room == Constants.unexplored_cell);
   end
-  figure(f), imagesc(room);
+  figure(f), imagesc(room), colorbar;
   fprintf('Explored All\n');
 end
 
@@ -114,7 +126,47 @@ function [curr_x, curr_y, orientation, hit_left, hit_front, hit_right] = move(se
 end
 
 function rotate90cw(serPort)
+    max_time = 1000000*(pi/2)/(Constants.angular_speed); %microseconds
+
+    SetFwdVelAngVelCreate(serPort, 0, -Constants.angular_speed);
+    t_start = tic;
+    while tic - t_start < max_time
+        pause(Constants.time_delay_sim);        
+    end
+    SetFwdVelAngVelCreate(serPort, 0, 0);
+    pause(Constants.time_delay);    
+end
+
+function rotate180cw(serPort)
+    max_time = 1000000*(pi)/(Constants.angular_speed); %microseconds
+    
+    SetFwdVelAngVelCreate(serPort, 0, -Constants.angular_speed);
+    t_start = tic;
+
+    while tic - t_start < max_time
+        pause(Constants.time_delay_sim);        
+    end
+    SetFwdVelAngVelCreate(serPort, 0, 0);
+    pause(Constants.time_delay);    
+end
+
+function rotate90ccw(serPort)
+    max_time = 1000000*(pi/2)/(Constants.angular_speed); %microseconds
+    
+    SetFwdVelAngVelCreate(serPort, 0, Constants.angular_speed);
+    t_start = tic;
+
+    while tic - t_start < max_time
+        pause(Constants.time_delay_sim);        
+    end
+    SetFwdVelAngVelCreate(serPort, 0, 0);
+    pause(Constants.time_delay);    
+end
+
+function rotate90cw_1(serPort)
        ang = 0;
+       AngleSensorRoomba(serPort);
+       pause(Constants.time_delay);
        AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        
@@ -122,17 +174,18 @@ function rotate90cw(serPort)
        pause(Constants.time_delay);
 
        while(ang < pi/2)
-           ang = ang + abs(AngleSensorRoomba(serPort))
+           ang = ang + abs(AngleSensorRoomba(serPort));
            pause(Constants.time_delay);
        end
-       ang = ang+ abs(AngleSensorRoomba(serPort));
+       AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        fprintf('Rotated cw %f\n', ang*180/pi);
 end
 
-
-function rotate180cw(serPort)
+function rotate180cw_1(serPort)
        ang = 0;
+       AngleSensorRoomba(serPort);
+       pause(Constants.time_delay);
        AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        
@@ -140,16 +193,18 @@ function rotate180cw(serPort)
        pause(Constants.time_delay);
        
        while(ang < pi)
-           ang = ang + abs(AngleSensorRoomba(serPort))
+           ang = ang + abs(AngleSensorRoomba(serPort));
            pause(Constants.time_delay);
        end
-       ang = ang+ abs(AngleSensorRoomba(serPort));
+       AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        fprintf('Rotated cw %f\n', ang*180/pi);
 end
 
-function rotate90ccw(serPort)
+function rotate90ccw_1(serPort)
        ang = 0;
+       AngleSensorRoomba(serPort);
+       pause(Constants.time_delay);
        AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        
@@ -157,10 +212,10 @@ function rotate90ccw(serPort)
        pause(Constants.time_delay);
        
        while(ang < pi/2)
-           ang = ang + abs(AngleSensorRoomba(serPort))
+           ang = ang + abs(AngleSensorRoomba(serPort));
            pause(Constants.time_delay);
        end
-       ang = ang+ abs(AngleSensorRoomba(serPort));
+       AngleSensorRoomba(serPort);
        pause(Constants.time_delay);
        fprintf('Rotated ccw %f\n', ang*180/pi);
 end
@@ -200,12 +255,12 @@ function [hit_left, hit_front, hit_right, distanceMoved] = moveForward(serPort, 
        while dist < abs(distance) & bumped == 0
         
         [hit_right, hit_left, WheelDropRight, WheelDropLeft, WheelDropCastor, hit_front] = BumpsWheelDropsSensorsRoomba(serPort);
-        pause(Constants.time_delay);
+        %pause(Constants.time_delay);
         bumped = hit_right|hit_left|hit_front;
-        
         dist = dist + abs(DistanceSensorRoomba(serPort));
         pause(Constants.time_delay);
        end
+       fprintf('Hit left=%d, front=%d, right=%d\n', hit_left, hit_front, hit_right);
        
        SetFwdVelAngVelCreate(serPort, 0, 0);
        pause(Constants.time_delay);       
