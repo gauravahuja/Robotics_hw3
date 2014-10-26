@@ -1,16 +1,21 @@
 function p = shortestPath(cx, cy, tx, ty, room, size)
     temp = ones(size, size)*10000;
     temp(ty, tx) = 0;
+    
     filledStack = ones(1, 2)*-1;
     filledStack(1, 1) = tx;
     filledStack(1, 2) = ty;
     filledStackSize = 1;
+    
     while (temp(cy, cx) == 10000) & (filledStackSize > 0)
+        
         tix = filledStack(1,1);
         tiy = filledStack(1,2);
-        newPathSize = temp(tiy, tix) +1;
+        
+        newPathSize = temp(tiy, tix) + 1;
         filledStack(1, :) = [];
         filledStackSize = filledStackSize-1;
+
         n = neighbors(tix, tiy, size);
         for i = [1:4]
             nix = n(i, 1);
@@ -18,9 +23,10 @@ function p = shortestPath(cx, cy, tx, ty, room, size)
             if (nix == -1 || niy == -1)
                 continue;
             end
-            if(room(niy, nix) == 125) %Obstacle
+            if(room(niy, nix) == Constants.obstacle_cell)
                 continue;
             end
+            
             if(temp(niy, nix) > newPathSize)
                 temp(niy, nix) = newPathSize;
                 filledStack = [filledStack; nix, niy];
@@ -28,11 +34,12 @@ function p = shortestPath(cx, cy, tx, ty, room, size)
             end
         end
     end
+    
     tix = cx;
     tiy = cy;
     pathSize = temp(tiy, tix);
     p = [];
-    fprintf('c = (%d, %d), t = (%d, %d)\n', cx, cy, tx, ty);
+    
     while(pathSize > 0 & pathSize < 10000)
         n = neighbors(tix, tiy, size);
         for i = [1:4]
